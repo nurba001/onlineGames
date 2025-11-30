@@ -1,3 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Платформы -->
+    <string-array name="platforms_array">
+        <item>Все платформы</item>
+        <item>PC</item>
+        <item>PC/PS4/Xbox</item>
+        <item>PC/PS5</item>
+    </string-array>
+
+    <!-- Жанры -->
+    <string-array name="genres_array">
+        <item>Все жанры</item>
+        <item>RPG</item>
+        <item>Action</item>
+    </string-array>
+
+    <string name="prompt_platform">Выберите платформу</string>
+    <string name="prompt_genre">Выберите жанр</string>
 </resources>
