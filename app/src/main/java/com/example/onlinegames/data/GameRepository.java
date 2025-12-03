@@ -1,14 +1,14 @@
 package com.example.onlinegames.data;
+
 import android.app.Application;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 
-import com.example.onlinegames.api.ApiGame;
 import com.example.onlinegames.api.GameApiService;
-import com.example.onlinegames.api.GameResponse;
 import com.example.onlinegames.api.RetrofitClient;
+import com.example.onlinegames.api.GbGame;
+import com.example.onlinegames.api.GbResponse;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -20,18 +20,21 @@ import retrofit2.Response;
 public class GameRepository {
 
     private final GameDao mGameDao;
-    private final ExecutorService mExecutorService;
+    private final LiveData<List<GameEntity>> mAllGames;
+    private  ExecutorService mExecutorService;
 
     public GameRepository(Application application) {
         GameDatabase db = GameDatabase.getDatabase(application);
         mGameDao = db.gameDao();
+        mAllGames = mGameDao.getAllGames();
         mExecutorService = GameDatabase.databaseWriteExecutor;
     }
 
-    // --- Стандартные методы DAO ---
-
     public LiveData<List<GameEntity>> getAllGames() {
-        return mGameDao.getAllGames();
+        return mAllGames;
+    }
+    public LiveData<GameEntity> getGameById(int gameId) {
+        return mGameDao.getGameById(gameId);
     }
 
     public LiveData<List<GameEntity>> searchGames(String query) {
@@ -39,105 +42,110 @@ public class GameRepository {
     }
 
     public LiveData<List<GameEntity>> filterGames(String platform, String genre) {
-        return mGameDao.filterGames(platform, genre);
+        String platformQuery = (platform.equals("Все платформы") || platform.equals("Все")) ? "%%" : "%" + platform + "%";
+        String genreQuery = (genre.equals("Все жанры") || genre.equals("Все")) ? "%%" : "%" + genre + "%";
+        return mGameDao.filterGames(platformQuery, genreQuery);
     }
 
-    public LiveData<GameEntity> getGameById(int id) {
-        return mGameDao.getGameById(id);
-    }
-
-    public LiveData<List<GameEntity>> getFavoriteGames() {
-        return mGameDao.getFavoriteGames();
+    public void insert(GameEntity game) {
+        mExecutorService.execute(() -> mGameDao.insert(game));
     }
 
     public void update(GameEntity game) {
         mExecutorService.execute(() -> mGameDao.update(game));
     }
 
+    public LiveData<List<GameEntity>> getFavoriteGames() {
+        return mGameDao.getFavoriteGames();
+    }
+
     public int getGameCount() {
         return mGameDao.getGameCount();
     }
 
-    // --- ЗАГРУЗКА ИЗ ИНТЕРНЕТА ---
+    // --- ЛОГИКА API ---
 
     public void fetchGamesFromApi(String apiKey) {
         GameApiService apiService = RetrofitClient.getApiService();
+        Call<GbResponse> call = apiService.getGames(
+                apiKey,
+                "json",
+                50,
+                "original_release_date:desc"
+        );
 
-        // Запрашиваем 40 игр, сортируем по рейтингу
-        Call<GameResponse> call = apiService.getGames(apiKey, 40, null, "-rating");
-
-        call.enqueue(new Callback<GameResponse>() {
+        call.enqueue(new Callback<GbResponse>() {
             @Override
-            public void onResponse(@NonNull Call<GameResponse> call, @NonNull Response<GameResponse> response) {
+            public void onResponse(Call<GbResponse> call, Response<GbResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    List<ApiGame> apiGames = response.body().getResults();
-                    // Сохраняем полученные игры в базу данных
-                    saveGamesToDatabase(apiGames);
+                    List<GbGame> games = response.body().getResults();
+                    if (games != null && !games.isEmpty()) {
+                        Log.d("API", "Успешно получено " + games.size() + " игр.");
+                        saveGamesToDatabase(games);
+                    } else {
+                        Log.d("API", "Успешный ответ, но список игр пуст.");
+                    }
                 } else {
-                    Log.e("GameRepository", "Ошибка сервера: " + response.code());
+                    Log.e("API", "Ошибка ответа API: Код " + response.code());
                 }
             }
 
             @Override
-            public void onFailure(@NonNull Call<GameResponse> call, @NonNull Throwable t) {
-                Log.e("GameRepository", "Ошибка сети: " + t.getMessage());
+            public void onFailure(Call<GbResponse> call, Throwable t) {
+                Log.e("API", "Ошибка соединения с API: " + t.getMessage());
             }
         });
     }
 
-    private void saveGamesToDatabase(List<ApiGame> apiGames) {
+    private void saveGamesToDatabase(List<GbGame> gbGames) {
         mExecutorService.execute(() -> {
-            for (ApiGame apiGame : apiGames) {
-                // 1. Преобразуем сложные списки (жанры, платформы) в простые строки
-                String genres = formatGenres(apiGame.getGenres());
-                String platforms = formatPlatforms(apiGame.getParentPlatforms());
-                int year = parseYear(apiGame.getReleased());
+            mGameDao.deleteAll();
+            Log.d("Database", "База данных очищена.");
 
-                // 2. Создаем Entity для нашей базы
-                GameEntity gameEntity = new GameEntity(
-                        apiGame.getName(),
+            for (GbGame gbGame : gbGames) {
+                // Используем исправленный метод formatNameObjects
+                String genres = formatNameObjects(gbGame.getGenres());
+                String platforms = formatNameObjects(gbGame.getPlatforms());
+
+                int year = 0;
+                String releaseDate = gbGame.getOriginalReleaseDate();
+                if (releaseDate != null && releaseDate.length() >= 4) {
+                    try {
+                        year = Integer.parseInt(releaseDate.substring(0, 4));
+                    } catch (NumberFormatException e) {
+                        Log.w("Parser", "Ошибка даты");
+                    }
+                }
+
+                String imageUrl = "";
+                if (gbGame.getImage() != null && gbGame.getImage().originalUrl != null) {
+                    imageUrl = gbGame.getImage().originalUrl;
+                }
+
+                String description = gbGame.getDescription() != null ? gbGame.getDescription() : "Нет описания.";
+
+                GameEntity entity = new GameEntity(
+                        gbGame.getName(),
                         genres,
                         platforms,
                         year,
-                        "Рейтинг RAWG: " + apiGame.getRating(), // Временное описание
-                        apiGame.getBackgroundImage()
+                        description,
+                        imageUrl
                 );
-
-                // 3. Сохраняем в базу
-                mGameDao.insert(gameEntity);
+                mGameDao.insert(entity);
             }
+            Log.d("Database", "Успешно сохранено " + gbGames.size() + " игр.");
         });
     }
 
-    // --- Вспомогательные методы для преобразования данных ---
-
-    private String formatGenres(List<ApiGame.Genre> genres) {
-        if (genres == null || genres.isEmpty()) return "Unknown";
+    // !!! ИСПРАВЛЕНИЕ: Используем GbGame.NameObject вместо ObjectInfo !!!
+    private String formatNameObjects(List<GbGame.NameObject> objects) {
+        if (objects == null || objects.isEmpty()) return "Неизвестно";
         StringBuilder sb = new StringBuilder();
-        for (ApiGame.Genre g : genres) {
-            sb.append(g.name).append(", ");
+        for (int i = 0; i < objects.size(); i++) {
+            sb.append(objects.get(i).name); // Доступ к полю name напрямую
+            if (i < objects.size() - 1) sb.append(", ");
         }
-        // Удаляем последнюю запятую
-        if (sb.length() > 2) sb.setLength(sb.length() - 2);
         return sb.toString();
-    }
-
-    private String formatPlatforms(List<ApiGame.PlatformWrapper> platforms) {
-        if (platforms == null || platforms.isEmpty()) return "PC";
-        // Для простоты берем только первую платформу или пишем Multi
-        if (platforms.size() > 1) return "PC/Console";
-        return platforms.get(0).platform.name;
-    }
-
-    private int parseYear(String releasedDate) {
-        // Дата приходит в формате "2013-09-17". Берем первые 4 символа.
-        if (releasedDate != null && releasedDate.length() >= 4) {
-            try {
-                return Integer.parseInt(releasedDate.substring(0, 4));
-            } catch (NumberFormatException e) {
-                return 2023;
-            }
-        }
-        return 2023;
     }
 }

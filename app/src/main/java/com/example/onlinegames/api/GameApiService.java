@@ -3,15 +3,16 @@ import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
 
+// Интерфейс для Giant Bomb API
 public interface GameApiService {
 
-    // Запрос списка игр
-    // Пример запроса: https://api.rawg.io/api/games?key=ТВОЙ_КЛЮЧ&page_size=20&search=Witcher
-    @GET("games")
-    Call<GameResponse> getGames(
-            @Query("key") String apiKey,         // Твой API ключ
-            @Query("page_size") int pageSize,    // Сколько игр загружать (например, 20)
-            @Query("search") String searchQuery, // Поисковый запрос (если есть)
-            @Query("ordering") String ordering   // Сортировка (например, "-rating")
+    // ВАЖНО: Мы меняем метод, чтобы он принимал 4 параметра,
+    // которые требует Giant Bomb, и возвращал новый тип ответа (GbResponse)
+    @GET("games/")
+    Call<GbResponse> getGames(
+            @Query("api_key") String apiKey,     // Твой API ключ (можно оставить пустым)
+            @Query("format") String format,      // Обязательно "json"
+            @Query("limit") int limit,           // Ограничение на количество игр (40)
+            @Query("sort") String sort           // Сортировка (по дате выхода)
     );
 }

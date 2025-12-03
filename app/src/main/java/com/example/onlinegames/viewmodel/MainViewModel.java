@@ -1,5 +1,7 @@
 package com.example.onlinegames.viewmodel;
+
 import android.app.Application;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -16,17 +18,14 @@ public class MainViewModel extends AndroidViewModel {
     private final GameRepository mRepository;
     private final LiveData<List<GameEntity>> mAllGames;
 
-    // ВСТАВЬ СЮДА СВОЙ РЕАЛЬНЫЙ КЛЮЧ RAWG, КОГДА ПОЛУЧИШЬ ЕГО!
-    // Пока используем заглушку, чтобы код компилировался.
-    // Если RAWG заработает, ты просто заменишь эту строку.
-    private static final String API_KEY = "TEST_KEY_CHANGE_ME_LATER";
+    // !!!  КЛЮЧ GIANT BOMB !!!
+    private static final String API_KEY = "724047fdf869b1cd366ca70da7ed7a0034d6c504";
 
     public MainViewModel(@NonNull Application application) {
         super(application);
         mRepository = new GameRepository(application);
         mAllGames = mRepository.getAllGames();
 
-        // Запускаем загрузку данных при создании ViewModel
         loadData();
     }
 
@@ -43,13 +42,18 @@ public class MainViewModel extends AndroidViewModel {
     }
 
     private void loadData() {
-        // Проверяем количество игр в базе данных в фоновом потоке
+        // Мы используем GameDatabase.databaseWriteExecutor для фоновых операций
         GameDatabase.databaseWriteExecutor.execute(() -> {
-            // Если база пустая (т.е. приложение запускается в первый раз),
-            // пробуем скачать игры из интернета
+            // 1. Проверяем, пуста ли база
             if (mRepository.getGameCount() == 0) {
-                // Вызываем метод загрузки из сети, передавая API ключ
+                Log.d("ViewModel", "База данных пуста. Загружаем данные из API.");
+
+                // 2. Пытаемся загрузить из сети (Giant Bomb)
                 mRepository.fetchGamesFromApi(API_KEY);
+
+                //  Мы удалили тестовые данные, чтобы загрузка из API была основной.
+            } else {
+                Log.d("ViewModel", "База данных уже содержит игры.");
             }
         });
     }

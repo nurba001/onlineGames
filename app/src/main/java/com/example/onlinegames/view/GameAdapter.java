@@ -2,7 +2,6 @@ package com.example.onlinegames.view;
 
 import android.content.Context;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
@@ -57,7 +56,7 @@ public class GameAdapter extends ListAdapter<GameEntity, GameAdapter.GameViewHol
         }
 
         public void bind(GameEntity game, Context context, OnItemClickListener listener) {
-            binding.textViewTitle.setText(game.getTitle());
+            binding.textViewTitle.setText(game.getName());
             binding.textViewPlatform.setText(game.getPlatform());
 
             String genreYear = game.getGenre() + ", " + game.getYear();
@@ -88,7 +87,7 @@ public class GameAdapter extends ListAdapter<GameEntity, GameAdapter.GameViewHol
 
                 @Override
                 public boolean areContentsTheSame(@NonNull GameEntity oldItem, @NonNull GameEntity newItem) {
-                    return oldItem.getTitle().equals(newItem.getTitle()) &&
+                    return oldItem.getName().equals(newItem.getName()) &&
                             oldItem.getGenre().equals(newItem.getGenre()) &&
                             oldItem.getYear() == newItem.getYear();
                 }

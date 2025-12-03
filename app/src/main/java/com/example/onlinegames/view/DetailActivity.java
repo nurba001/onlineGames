@@ -65,7 +65,7 @@ public class DetailActivity extends AppCompatActivity {
                 .into(binding.detailImageCover);
 
         // Заполняем текстовые поля
-        binding.detailTextTitle.setText(game.getTitle());
+        binding.detailTextTitle.setText(game.getName());
         binding.detailTextDescription.setText(game.getDescription());
         binding.detailTextPlatform.setText("Платформы: " + game.getPlatform());
         binding.detailTextGenre.setText("Жанр: " + game.getGenre());
