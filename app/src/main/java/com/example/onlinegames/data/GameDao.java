@@ -1,6 +1,5 @@
 package com.example.onlinegames.data;
 
-// !!! ЭТИ ДВА ИМПОРТА ДОЛЖНЫ БЫТЬ ОБЯЗАТЕЛЬНО !!!
 import androidx.lifecycle.LiveData;
 import java.util.List;
 

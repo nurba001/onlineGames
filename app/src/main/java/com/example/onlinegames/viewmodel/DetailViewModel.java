@@ -1,7 +1,6 @@
 package com.example.onlinegames.viewmodel;
 
 import android.app.Application;
-
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
@@ -18,12 +17,10 @@ public class DetailViewModel extends AndroidViewModel {
         super(application);
         mRepository = new GameRepository(application);
     }
-
     // Получить одну игру по ID
     public LiveData<GameEntity> getGameById(int gameId) {
         return mRepository.getGameById(gameId);
     }
-
     // Обновить игру (когда пользователь сохраняет отзыв/рейтинг)
     public void updateGame(GameEntity game) {
         mRepository.update(game);

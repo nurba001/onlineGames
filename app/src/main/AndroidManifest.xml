@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- *** ГЛАВНОЕ ИСПРАВЛЕНИЕ: РАЗРЕШЕНИЕ НА ИНТЕРНЕТ *** -->
+
     <!-- Это нужно, чтобы Glide мог загружать картинки с wiki-ссылок -->
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -31,12 +31,9 @@
             android:name=".view.DetailActivity"
             android:exported="false" />
 
-        <!-- Вы добавите FavoriteActivity позже -->
-        <!--
         <activity
             android:name=".view.FavoriteActivity"
             android:exported="false" />
-        -->
 
     </application>
 

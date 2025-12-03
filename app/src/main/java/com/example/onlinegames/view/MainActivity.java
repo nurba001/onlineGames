@@ -48,10 +48,9 @@ public class MainActivity extends AppCompatActivity {
         setupSpinners();
 
         binding.buttonShowFavorites.setOnClickListener(v -> {
-            // Пока просто покажем сообщение, так как FavoriteActivity еще нет
-            Toast.makeText(this, "Скоро будет!", Toast.LENGTH_SHORT).show();
-            // Intent intent = new Intent(MainActivity.this, FavoriteActivity.class);
-            // startActivity(intent);
+
+             Intent intent = new Intent(MainActivity.this, FavoriteActivity.class);
+             startActivity(intent);
         });
 
         observeLiveData(mainViewModel.getAllGames());
@@ -123,7 +122,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void applyFilters() {
-        // --- ИСПРАВЛЕНИЕ ОШИБКИ ---
         // Мы УБРАЛИ строку: binding.searchView.setQuery("", false);
         // Это разрывает бесконечный цикл.
 

@@ -10,7 +10,7 @@ public interface GameApiService {
     // которые требует Giant Bomb, и возвращал новый тип ответа (GbResponse)
     @GET("games/")
     Call<GbResponse> getGames(
-            @Query("api_key") String apiKey,     // Твой API ключ (можно оставить пустым)
+            @Query("api_key") String apiKey,     // API ключ
             @Query("format") String format,      // Обязательно "json"
             @Query("limit") int limit,           // Ограничение на количество игр (40)
             @Query("sort") String sort           // Сортировка (по дате выхода)

@@ -10,14 +10,15 @@ import androidx.lifecycle.ViewModelProvider;
 import com.bumptech.glide.Glide;
 import com.example.onlinegames.R;
 import com.example.onlinegames.data.GameEntity;
-import com.example.onlinegames.databinding.ActivityDetailBinding; // <-- Импорт ViewBinding
+import com.example.onlinegames.databinding.ActivityDetailBinding;
 import com.example.onlinegames.viewmodel.DetailViewModel;
 
 public class DetailActivity extends AppCompatActivity {
 
     private ActivityDetailBinding binding;
     private DetailViewModel detailViewModel;
-    private GameEntity currentGame; // Храним текущую игру
+    private GameEntity currentGame; // Здесь мы храним текущую загруженную игру
+    private int gameId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,74 +26,77 @@ public class DetailActivity extends AppCompatActivity {
         binding = ActivityDetailBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        // 1. Получаем ID игры, который передали из MainActivity
-        int gameId = getIntent().getIntExtra("GAME_ID", -1);
+        // 1. Получаем ID игры из Intent
+        gameId = getIntent().getIntExtra("GAME_ID", -1);
         if (gameId == -1) {
-            // Если ID не пришел, закрываем Activity
-            Toast.makeText(this, "Ошибка: ID игры не найден", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Ошибка: Игра не найдена", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
-        // 2. Инициализация ViewModel
+        // 2. Инициализируем ViewModel
         detailViewModel = new ViewModelProvider(this).get(DetailViewModel.class);
 
-        // 3. Подписка на LiveData
-        // Мы "наблюдаем" за игрой по ее ID
+        // 3. Подписываемся на данные игры
         detailViewModel.getGameById(gameId).observe(this, new Observer<GameEntity>() {
             @Override
             public void onChanged(GameEntity gameEntity) {
-                // Этот код выполнится, когда Room найдет игру
                 if (gameEntity != null) {
-                    currentGame = gameEntity; // Сохраняем игру
-                    updateUI(gameEntity);
+                    currentGame = gameEntity; // Запоминаем игру
+                    updateUI(gameEntity);     // Обновляем экран
                 }
             }
         });
 
-        // 4. Настройка кнопки "Сохранить"
+        // 4. Настройка кнопки "Сохранить в избранное"
         binding.buttonSaveFavorite.setOnClickListener(v -> {
             saveFavoriteData();
         });
     }
 
-    // Метод для обновления UI
     private void updateUI(GameEntity game) {
-        // Загружаем обложку
+        // Картинка
         Glide.with(this)
                 .load(game.getImageUrl())
                 .placeholder(R.drawable.ic_launcher_background)
-                .into(binding.detailImageCover);
+                .into(binding.detailImageCover); // Убедись, что ID в XML такой же (detailImageCover или detailCover)
 
-        // Заполняем текстовые поля
+        // Тексты
         binding.detailTextTitle.setText(game.getName());
         binding.detailTextDescription.setText(game.getDescription());
         binding.detailTextPlatform.setText("Платформы: " + game.getPlatform());
         binding.detailTextGenre.setText("Жанр: " + game.getGenre());
 
-        // Заполняем поля "Избранного" (если они уже есть)
+        // Если мы уже сохраняли отзыв раньше, показываем его
         binding.editTextComment.setText(game.getComment());
         binding.ratingBarUser.setRating(game.getUserRating());
+
+        // Меняем текст кнопки, если игра уже в избранном
+        if (game.isFavorite()) {
+            binding.buttonSaveFavorite.setText("Обновить отзыв");
+        } else {
+            binding.buttonSaveFavorite.setText("Сохранить в избранное");
+        }
     }
 
-    // Метод для сохранения отзыва
     private void saveFavoriteData() {
         if (currentGame == null) return;
 
-        // Получаем данные из полей
+        // 1. Берем данные из полей ввода
         String comment = binding.editTextComment.getText().toString();
         float rating = binding.ratingBarUser.getRating();
 
-        // Обновляем наш объект 'currentGame'
+        // 2. Обновляем объект игры
         currentGame.setComment(comment);
         currentGame.setUserRating(rating);
-        currentGame.setFavorite(true); // Помечаем как избранное
+        currentGame.setFavorite(true); // Теперь это ИЗБРАННАЯ игра!
 
-        // Вызываем метод ViewModel для обновления в базе данных
+        // 3. Сохраняем в базу данных через ViewModel
         detailViewModel.updateGame(currentGame);
 
-        // Показываем сообщение
-        Toast.makeText(this, "Отзыв сохранен!", Toast.LENGTH_SHORT).show();
-        finish(); // Возвращаемся на главный экран
+        Toast.makeText(this, "Добавлено в избранное!", Toast.LENGTH_SHORT).show();
+
+        // Можно закрыть экран после сохранения, или остаться
+        finish();
     }
 }
