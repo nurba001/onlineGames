@@ -1,39 +1,30 @@
 package com.example.onlinegames.api;
 
 import okhttp3.OkHttpClient;
-import okhttp3.Request;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitClient {
 
-    private static final String BASE_URL = "https://www.giantbomb.com/api/";
+    // ВАЖНО: Новый адрес Public API FreeToGame
+    private static final String BASE_URL = "https://www.freetogame.com/api/";
     private static Retrofit retrofit = null;
 
-    // Метод для получения экземпляра API сервиса
-    public static GameApiService getApiService() {
+    public static Retrofit getClient() {
         if (retrofit == null) {
+            // Public API не требует ключа и User-Agent
+            OkHttpClient client = new OkHttpClient.Builder().build();
 
-            // 1. Создаем "Клиента", который будет добавлять заголовок User-Agent
-            // Giant Bomb ТРЕБУЕТ этот заголовок, иначе он блокирует запрос
-            OkHttpClient client = new OkHttpClient.Builder()
-                    .addInterceptor(chain -> {
-                        Request original = chain.request();
-                        Request request = original.newBuilder()
-                                .header("User-Agent", "GameCatalogApp-Nurbek-StudentProject") // Наше "Имя"
-                                .method(original.method(), original.body())
-                                .build();
-                        return chain.proceed(request);
-                    })
-                    .build();
-
-            // 2. Подключаем этого клиента к Retrofit
             retrofit = new Retrofit.Builder()
                     .baseUrl(BASE_URL)
-                    .client(client) // <-- Важная добавка!
+                    .client(client)
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
         }
-        return retrofit.create(GameApiService.class);
+        return retrofit;
+    }
+
+    public static GameApiService getApiService() {
+        return getClient().create(GameApiService.class);
     }
 }

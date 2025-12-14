@@ -1,11 +1,11 @@
 // ПЛАГИНЫ
 plugins {
-    id 'com.android.application'
+    alias(libs.plugins.android.application)
 }
 
 android {
     namespace 'com.example.onlinegames' // Замените на имя вашего пакета
-    compileSdk 36
+    compileSdk 34
 
     defaultConfig {
         applicationId "com.example.onlinegames" // Замените на имя вашего пакета
@@ -40,45 +40,30 @@ android {
 dependencies {
 
     // --- СТАНДАРТНЫЕ (UI и Core) ---
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.11.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-
-    // --- RECYCLERVIEW (Для списков) ---
-    implementation 'androidx.recyclerview:recyclerview:1.3.2'
+    implementation libs.appcompat
+    implementation libs.material
+    implementation libs.constraintlayout
+    implementation libs.recyclerview
 
     // --- LIFECYCLE (Для MVVM: ViewModel и LiveData) ---
-    def lifecycle_version = "2.7.0" // Можно удалить, так как версии теперь указаны явно
-    // ViewModel
-    implementation 'androidx.lifecycle:lifecycle-viewmodel:2.7.0'
-    // LiveData
-    implementation 'androidx.lifecycle:lifecycle-livedata:2.7.0'
-    // Для использования Java 8 с Lifecycle
-    implementation 'androidx.lifecycle:lifecycle-common-java8:2.7.0'
-
+    implementation libs.lifecycle.viewmodel
+    implementation libs.lifecycle.livedata
+    implementation libs.lifecycle.common.java8
 
     // --- ROOM (Для Базы Данных) ---
-    def room_version = "2.6.1"
-    implementation "androidx.room:room-runtime:$room_version"
-
-    // ВАЖНО: Используем 'annotationProcessor', так как у нас Java проект
-    annotationProcessor "androidx.room:room-compiler:$room_version"
-
+    implementation libs.room.runtime
+    annotationProcessor libs.room.compiler
 
     // --- GLIDE (Для загрузки изображений) ---
-    def glide_version = "4.16.0"
-    implementation "com.github.bumptech.glide:glide:$glide_version"
-    annotationProcessor "com.github.bumptech.glide:compiler:$glide_version"
+    implementation libs.glide
+    annotationProcessor libs.glide.compiler
 
     // --- RETROFIT (Для работы с API) ---
-    implementation "com.squareup.retrofit2:retrofit:2.9.0"
-    implementation "com.squareup.retrofit2:converter-gson:2.9.0"
-
+    implementation libs.retrofit
+    implementation libs.retrofit.converter.gson
 
     // --- ТЕСТИРОВАНИЕ (Стандартные) ---
-    // Здесь я использую стандартные версии, так как они не были указаны
-    testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    testImplementation libs.junit
+    androidTestImplementation libs.androidx.test.ext.junit
+    androidTestImplementation libs.androidx.test.espresso.core
 }
-

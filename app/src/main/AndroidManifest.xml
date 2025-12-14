@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
 
-    <!-- Это нужно, чтобы Glide мог загружать картинки с wiki-ссылок -->
+
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application

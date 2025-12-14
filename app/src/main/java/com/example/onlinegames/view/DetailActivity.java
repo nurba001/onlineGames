@@ -20,6 +20,7 @@ public class DetailActivity extends AppCompatActivity {
     private GameEntity currentGame; // Здесь мы храним текущую загруженную игру
     private int gameId;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

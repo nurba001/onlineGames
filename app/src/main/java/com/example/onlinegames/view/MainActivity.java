@@ -5,21 +5,15 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.onlinegames.R;
-import com.example.onlinegames.data.GameEntity;
 import com.example.onlinegames.databinding.ActivityMainBinding;
 import com.example.onlinegames.viewmodel.MainViewModel;
-
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -27,12 +21,6 @@ public class MainActivity extends AppCompatActivity {
 
     private MainViewModel mainViewModel;
     private GameAdapter gameAdapter;
-
-    // Переменные для хранения состояния фильтров
-    private String currentPlatformFilter = "Все платформы";
-    private String currentGenreFilter = "Все жанры";
-
-    private LiveData<List<GameEntity>> currentLiveData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,12 +36,16 @@ public class MainActivity extends AppCompatActivity {
         setupSpinners();
 
         binding.buttonShowFavorites.setOnClickListener(v -> {
-
              Intent intent = new Intent(MainActivity.this, FavoriteActivity.class);
              startActivity(intent);
         });
 
-        observeLiveData(mainViewModel.getAllGames());
+        // Observe the single LiveData from the ViewModel
+        mainViewModel.getGames().observe(this, games -> {
+            if (games != null) {
+                gameAdapter.submitList(games);
+            }
+        });
     }
 
     private void setupRecyclerView() {
@@ -71,19 +63,14 @@ public class MainActivity extends AppCompatActivity {
         binding.searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                performSearch(query);
-                // Скрываем клавиатуру после поиска
+                mainViewModel.setSearchQuery(query);
                 binding.searchView.clearFocus();
                 return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                if (newText.isEmpty()) {
-                    applyFilters();
-                } else {
-                    performSearch(newText);
-                }
+                mainViewModel.setSearchQuery(newText);
                 return true;
             }
         });
@@ -103,8 +90,8 @@ public class MainActivity extends AppCompatActivity {
         binding.spinnerPlatform.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                currentPlatformFilter = parent.getItemAtPosition(position).toString();
-                applyFilters();
+                String platform = parent.getItemAtPosition(position).toString();
+                mainViewModel.setPlatformFilter(platform.equals("Все платформы") ? "Все" : platform);
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
@@ -113,42 +100,11 @@ public class MainActivity extends AppCompatActivity {
         binding.spinnerGenre.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                currentGenreFilter = parent.getItemAtPosition(position).toString();
-                applyFilters();
+                String genre = parent.getItemAtPosition(position).toString();
+                mainViewModel.setGenreFilter(genre.equals("Все жанры") ? "Все" : genre);
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
-        });
-    }
-
-    private void applyFilters() {
-        // Мы УБРАЛИ строку: binding.searchView.setQuery("", false);
-        // Это разрывает бесконечный цикл.
-
-        String platform = currentPlatformFilter.equals("Все платформы") ? "Все" : currentPlatformFilter;
-        String genre = currentGenreFilter.equals("Все жанры") ? "Все" : currentGenreFilter;
-
-        observeLiveData(mainViewModel.filterGames(platform, genre));
-    }
-
-    private void performSearch(String query) {
-        observeLiveData(mainViewModel.searchGames(query));
-    }
-
-    private void observeLiveData(LiveData<List<GameEntity>> newLiveData) {
-        if (currentLiveData != null) {
-            currentLiveData.removeObservers(this);
-        }
-
-        currentLiveData = newLiveData;
-
-        currentLiveData.observe(this, new Observer<List<GameEntity>>() {
-            @Override
-            public void onChanged(List<GameEntity> games) {
-                if (games != null) {
-                    gameAdapter.submitList(games);
-                }
-            }
         });
     }
 }
