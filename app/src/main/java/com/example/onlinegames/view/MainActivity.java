@@ -18,7 +18,6 @@ import com.example.onlinegames.viewmodel.MainViewModel;
 public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
-
     private MainViewModel mainViewModel;
     private GameAdapter gameAdapter;
 
@@ -40,10 +39,17 @@ public class MainActivity extends AppCompatActivity {
              startActivity(intent);
         });
 
-        // Observe the single LiveData from the ViewModel
-        mainViewModel.getGames().observe(this, games -> {
-            if (games != null) {
-                gameAdapter.submitList(games);
+        mainViewModel.gamesDisplay.observe(this, games -> {
+            gameAdapter.submitList(games);
+        });
+
+
+        binding.fabAddGame.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Открываем экран добавления новой игры
+                Intent intent = new Intent(MainActivity.this, AddGameActivity.class);
+                startActivity(intent);
             }
         });
     }
@@ -54,7 +60,6 @@ public class MainActivity extends AppCompatActivity {
             intent.putExtra("GAME_ID", game.getId());
             startActivity(intent);
         });
-
         binding.recyclerViewGames.setAdapter(gameAdapter);
         binding.recyclerViewGames.setLayoutManager(new LinearLayoutManager(this));
     }
@@ -67,7 +72,6 @@ public class MainActivity extends AppCompatActivity {
                 binding.searchView.clearFocus();
                 return true;
             }
-
             @Override
             public boolean onQueryTextChange(String newText) {
                 mainViewModel.setSearchQuery(newText);
@@ -77,13 +81,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupSpinners() {
+        // Используем кастомный layout spinner_item для белого текста
         ArrayAdapter<CharSequence> platformAdapter = ArrayAdapter.createFromResource(this,
-                R.array.platforms_array, android.R.layout.simple_spinner_item);
+                R.array.platforms_array, R.layout.spinner_item);
         platformAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         binding.spinnerPlatform.setAdapter(platformAdapter);
 
         ArrayAdapter<CharSequence> genreAdapter = ArrayAdapter.createFromResource(this,
-                R.array.genres_array, android.R.layout.simple_spinner_item);
+                R.array.genres_array, R.layout.spinner_item);
         genreAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         binding.spinnerGenre.setAdapter(genreAdapter);
 

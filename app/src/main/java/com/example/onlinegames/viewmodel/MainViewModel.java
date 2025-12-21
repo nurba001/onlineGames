@@ -1,102 +1,87 @@
 package com.example.onlinegames.viewmodel;
 
 import android.app.Application;
-import android.util.Log;
-
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.Observer;
 
-import com.example.onlinegames.data.GameDatabase;
 import com.example.onlinegames.data.GameEntity;
 import com.example.onlinegames.data.GameRepository;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
+import java.util.Set;
 
 public class MainViewModel extends AndroidViewModel {
 
     private final GameRepository mRepository;
-    private LiveData<List<GameEntity>> currentDbSource;
+    private final LiveData<List<GameEntity>> mAllGames;
 
-    // Triggers for search and filter
-    private final MutableLiveData<String> queryFilter = new MutableLiveData<>("");
-    private final MutableLiveData<String> platformFilter = new MutableLiveData<>("Все");
-    private final MutableLiveData<String> genreFilter = new MutableLiveData<>("Все");
+    private final MutableLiveData<String> currentGenreFilter = new MutableLiveData<>("Все");
+    private final MutableLiveData<String> currentPlatformFilter = new MutableLiveData<>("Все");
+    private final MutableLiveData<String> searchQuery = new MutableLiveData<>("");
+    private final MutableLiveData<Boolean> isFavoriteMode = new MutableLiveData<>(false);
 
-    // Single LiveData exposed to the UI
-    private final MediatorLiveData<List<GameEntity>> games = new MediatorLiveData<>();
+    private final MediatorLiveData<List<GameEntity>> _gamesDisplay = new MediatorLiveData<>();
+    public final LiveData<List<GameEntity>> gamesDisplay = _gamesDisplay;
 
     public MainViewModel(@NonNull Application application) {
         super(application);
         mRepository = new GameRepository(application);
+        mAllGames = mRepository.getAllGames();
 
-        // Observer that reacts to any change in filters
-        Observer<Object> observer = o -> {
-            if (currentDbSource != null) {
-                games.removeSource(currentDbSource);
-            }
-
-            String query = queryFilter.getValue();
-            String platform = Objects.requireNonNull(platformFilter.getValue());
-            String genre = Objects.requireNonNull(genreFilter.getValue());
-
-            // Decide which repository method to call
-            if (query != null && !query.isEmpty()) {
-                currentDbSource = mRepository.searchGames(query);
-            } else {
-                currentDbSource = mRepository.filterGames(platform, genre);
-            }
-            games.addSource(currentDbSource, games::setValue);
-        };
-
-        games.addSource(queryFilter, observer);
-        games.addSource(platformFilter, observer);
-        games.addSource(genreFilter, observer);
-
-        // --- THE FIX ---
-        // Trigger the initial load by setting a value. This will fire the observer.
-        platformFilter.setValue(platformFilter.getValue());
-
-        loadData();
+        // Объединяем все источники данных
+        _gamesDisplay.addSource(mAllGames, this::filterAndDisplay);
+        _gamesDisplay.addSource(currentGenreFilter, g -> filterAndDisplay(mAllGames.getValue()));
+        _gamesDisplay.addSource(currentPlatformFilter, p -> filterAndDisplay(mAllGames.getValue()));
+        _gamesDisplay.addSource(searchQuery, q -> filterAndDisplay(mAllGames.getValue()));
+        _gamesDisplay.addSource(isFavoriteMode, f -> filterAndDisplay(mAllGames.getValue()));
     }
 
-    // The UI will observe this single LiveData
-    public LiveData<List<GameEntity>> getGames() {
-        return games;
-    }
+    private void filterAndDisplay(List<GameEntity> allGames) {
+        if (allGames == null) return;
 
-    // --- Methods to trigger updates from the UI ---
+        List<GameEntity> filteredList = new ArrayList<>();
+        String genre = currentGenreFilter.getValue();
+        String platform = currentPlatformFilter.getValue();
+        String query = searchQuery.getValue().toLowerCase().trim();
+        boolean favoritesOnly = isFavoriteMode.getValue();
 
-    public void setSearchQuery(String query) {
-        if (!Objects.equals(query, queryFilter.getValue())) {
-            queryFilter.setValue(query);
+        for (GameEntity game : allGames) {
+            // 1. Проверка на избранное
+            if (favoritesOnly && !game.isFavorite()) continue;
+
+            // 2. Проверка на жанр
+            if (!genre.equals("Все") && !game.getGenre().contains(genre)) continue;
+
+            // 3. Проверка на платформу
+            if (!platform.equals("Все") && !game.getPlatform().contains(platform)) continue;
+
+            // 4. Проверка на поиск (по названию)
+            if (!query.isEmpty() && !game.getName().toLowerCase().contains(query)) continue;
+
+            filteredList.add(game);
         }
-    }
 
-    public void setPlatformFilter(String platform) {
-        if (!Objects.equals(platform, platformFilter.getValue())) {
-            platformFilter.setValue(platform);
-        }
+        _gamesDisplay.setValue(filteredList);
     }
 
     public void setGenreFilter(String genre) {
-        if (!Objects.equals(genre, genreFilter.getValue())) {
-            genreFilter.setValue(genre);
-        }
+        currentGenreFilter.setValue(genre);
     }
 
-    private void loadData() {
-        GameDatabase.databaseWriteExecutor.execute(() -> {
-            if (mRepository.getGameCount() == 0) {
-                Log.d("ViewModel", "База данных пуста. Загружаем данные из API.");
-                mRepository.fetchGamesFromApi();
-            } else {
-                Log.d("ViewModel", "База данных уже содержит игры.");
-            }
-        });
+    public void setPlatformFilter(String platform) {
+        currentPlatformFilter.setValue(platform);
     }
+
+    public void setSearchQuery(String query) {
+        searchQuery.setValue(query);
+    }
+
+    public void addGame(GameEntity game) { mRepository.insertGame(game); }
+    public void deleteGame(GameEntity game) { mRepository.deleteGame(game); }
+    public void updateGame(GameEntity game) { mRepository.updateGame(game); }
 }

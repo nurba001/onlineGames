@@ -4,25 +4,27 @@ import android.app.Application;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
-
 import com.example.onlinegames.data.GameEntity;
 import com.example.onlinegames.data.GameRepository;
 
-// ViewModel для Экрана "Детали"
 public class DetailViewModel extends AndroidViewModel {
-
-    private final GameRepository mRepository;
+    private final GameRepository repository;
 
     public DetailViewModel(@NonNull Application application) {
         super(application);
-        mRepository = new GameRepository(application);
+        repository = new GameRepository(application);
     }
-    // Получить одну игру по ID
+
     public LiveData<GameEntity> getGameById(int gameId) {
-        return mRepository.getGameById(gameId);
+        return repository.getGameById(gameId);
     }
-    // Обновить игру (когда пользователь сохраняет отзыв/рейтинг)
+
     public void updateGame(GameEntity game) {
-        mRepository.update(game);
+        repository.updateGame(game);
+    }
+
+    // Метод для удаления игры (DELETE)
+    public void deleteGame(GameEntity game) {
+        repository.deleteGame(game);
     }
 }

@@ -36,8 +36,8 @@ public class GameConverter {
                     platformStr,
                     genreStr,
                     year,
-                    description
-            );
+                    description,
+                    false, 0, "");
             gameEntities.add(entity);
         }
         return gameEntities;

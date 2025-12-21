@@ -41,7 +41,18 @@ public class DetailActivity extends AppCompatActivity {
                 updateUI(gameEntity);
             }
         });
-
+        binding.buttonDeleteGame.setOnClickListener(v -> {
+            if (currentGame != null) {
+                try {
+                    // Добавь метод deleteGame во DetailViewModel
+                    detailViewModel.deleteGame(currentGame);
+                    Toast.makeText(this, "Игра удалена навсегда", Toast.LENGTH_SHORT).show();
+                    finish(); // Возвращаемся на главный экран
+                } catch (Exception e) {
+                    Toast.makeText(this, "Не удалось удалить", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
         // --- НОВАЯ ЛОГИКА ДЛЯ КНОПОК ---
 
         // Кнопка для добавления/удаления из избранного

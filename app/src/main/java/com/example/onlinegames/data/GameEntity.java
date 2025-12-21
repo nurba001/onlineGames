@@ -1,6 +1,7 @@
 package com.example.onlinegames.data;
 
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 @Entity(tableName = "game_table")
@@ -21,8 +22,11 @@ public class GameEntity {
     private float userRating = 0.0f;
     private String comment = "";
 
+    public GameEntity() {
+    }
 
-    public GameEntity(int id, String name, String imageUrl, String platform, String genre, String year, String description) {
+    @Ignore
+    public GameEntity(int id, String name, String imageUrl, String platform, String genre, String year, String description, boolean isFavorite, float userRating, String comment) {
         this.id = id;
         this.name = name;
         this.imageUrl = imageUrl;
@@ -30,6 +34,9 @@ public class GameEntity {
         this.genre = genre;
         this.year = year;
         this.description = description;
+        this.isFavorite = isFavorite;
+        this.userRating = userRating;
+        this.comment = comment;
     }
 
     // --- GETTERS & SETTERS

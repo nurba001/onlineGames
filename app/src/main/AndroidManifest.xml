@@ -2,8 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-
-
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
@@ -17,7 +15,6 @@
         android:theme="@style/Theme.OnlineGames"
         tools:targetApi="31">
 
-        <!-- Мы регистрируем наши Activity здесь: -->
         <activity
             android:name=".view.MainActivity"
             android:exported="true">
@@ -33,6 +30,11 @@
 
         <activity
             android:name=".view.FavoriteActivity"
+            android:exported="false" />
+
+        <!-- Добавляем недостающую Activity для регистрации -->
+        <activity
+            android:name=".view.AddGameActivity"
             android:exported="false" />
 
     </application>
