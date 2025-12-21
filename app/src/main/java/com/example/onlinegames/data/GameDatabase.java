@@ -9,8 +9,8 @@ import androidx.room.RoomDatabase;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-// 1. Увеличили версию до 2
-@Database(entities = {GameEntity.class}, version = 2, exportSchema = false)
+// 1. Увеличили версию до 3
+@Database(entities = {GameEntity.class}, version =3, exportSchema = false)
 public abstract class GameDatabase extends RoomDatabase {
 
     public abstract GameDao gameDao();

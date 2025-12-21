@@ -1,70 +1,103 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- CardView - стандартный Material компонент для карточек -->
-<com.google.android.material.card.MaterialCardView
+<androidx.cardview.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
+    android:layout_marginHorizontal="12dp"
+    android:layout_marginVertical="8dp"
+    app:cardCornerRadius="12dp"
     app:cardElevation="4dp"
-    app:cardCornerRadius="8dp">
+    app:cardBackgroundColor="@android:color/white">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:paddingBottom="12dp">
 
-        <!-- Обложка игры (Glide будет загружать сюда картинку) -->
+        <!-- 1. Обложка игры -->
         <ImageView
             android:id="@+id/image_view_cover"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:contentDescription="TODO"
+            android:layout_width="0dp"
+            android:layout_height="180dp"
             android:scaleType="centerCrop"
-            android:background="#EEE"
-            app:layout_constraintStart_toStartOf="parent"
+            android:src="@android:drawable/ic_menu_gallery"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            tools:src="@tools:sample/avatars" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- Название игры -->
+        <!-- Градиент/Тень снизу картинки (для красоты) -->
+        <View
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:background="#4D000000"
+            app:layout_constraintBottom_toBottomOf="@id/image_view_cover"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- 2. Рейтинг (в углу на картинке) -->
+        <TextView
+            android:id="@+id/text_view_rating"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:background="@drawable/bg_rating_badge"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="4dp"
+            android:text="4.5"
+            android:textColor="@android:color/white"
+            android:textStyle="bold"
+            android:textSize="12sp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- 3. Название игры -->
         <TextView
             android:id="@+id/text_view_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginTop="8dp"
-            android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
-            app:layout_constraintStart_toEndOf="@id/image_view_cover"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            tools:text="Название Игры (Title)" />
+            android:layout_marginTop="12dp"
+            android:layout_marginHorizontal="12dp"
+            android:text="Game Title"
+            android:textColor="#333333"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end"
+            app:layout_constraintTop_toBottomOf="@id/image_view_cover"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- Жанр и Год -->
+        <!-- 4. Жанр и Год -->
         <TextView
             android:id="@+id/text_view_genre_year"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
-            app:layout_constraintStart_toStartOf="@id/text_view_title"
+            android:layout_marginHorizontal="12dp"
+            android:text="Action • 2023"
+            android:textColor="#757575"
+            android:textSize="14sp"
             app:layout_constraintTop_toBottomOf="@id/text_view_title"
-            app:layout_constraintEnd_toEndOf="@id/text_view_title"
-            tools:text="RPG, 2023" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- Платформа -->
+        <!-- 5. Платформа (маленьким шрифтом снизу) -->
         <TextView
             android:id="@+id/text_view_platform"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
-            app:layout_constraintStart_toStartOf="@id/text_view_title"
+            android:layout_marginTop="8dp"
+            android:layout_marginHorizontal="12dp"
+            android:text="PC, Windows"
+            android:textColor="#9E9E9E"
+            android:textSize="12sp"
+            android:maxLines="1"
+            android:ellipsize="end"
             app:layout_constraintTop_toBottomOf="@id/text_view_genre_year"
-            app:layout_constraintEnd_toEndOf="@id/text_view_title"
-            tools:text="PC, PS5, Xbox" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-</com.google.android.material.card.MaterialCardView>
+</androidx.cardview.widget.CardView>

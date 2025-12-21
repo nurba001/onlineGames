@@ -10,13 +10,13 @@ public class GameConverter {
         List<GameEntity> gameEntities = new ArrayList<>();
 
         if (apiGames == null) {
-            return gameEntities; // Return empty list if the input is null
+            return gameEntities; // Если входные данные равны null, возвращается пустой список.
         }
 
         for (ApiGame apiGame : apiGames) {
-            if (apiGame == null) continue; // Skip if any game object in the list is null
+            if (apiGame == null) continue; // Пропустить, если какой-либо игровой объект в списке равен null
 
-            // Safely extract data from ApiGame, providing default values
+            // Безопасное извлечение данных из ApiGame с указанием значений по умолчанию.
             String year = "";
             if (apiGame.getReleaseDate() != null && apiGame.getReleaseDate().length() >= 4) {
                 year = apiGame.getReleaseDate().substring(0, 4);
@@ -28,7 +28,7 @@ public class GameConverter {
             String description = apiGame.getDescription() != null ? apiGame.getDescription() : "No description available.";
             String title = apiGame.getTitle() != null ? apiGame.getTitle() : "Untitled";
 
-            // Create the entity using the single, correct constructor from GameEntity
+            // Создайте сущность, используя единственный и правильный конструктор из класса GameEntity
             GameEntity entity = new GameEntity(
                     apiGame.getId(),
                     title,

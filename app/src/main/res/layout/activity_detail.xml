@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- ScrollView нужен, чтобы экран можно было прокручивать, если описание длинное -->
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -7,14 +6,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".view.DetailActivity">
-    <!-- Мы позже создадим DetailActivity в папке 'view' -->
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="16dp">
 
-        <!-- 1. Обложка/Скриншот -->
         <ImageView
             android:id="@+id/detail_image_cover"
             android:layout_width="0dp"
@@ -26,7 +23,6 @@
             app:layout_constraintEnd_toEndOf="parent"
             tools:src="@tools:sample/backgrounds/scenic" />
 
-        <!-- 2. Название -->
         <TextView
             android:id="@+id/detail_text_title"
             android:layout_width="0dp"
@@ -38,7 +34,6 @@
             app:layout_constraintEnd_toEndOf="parent"
             tools:text="Очень Длинное Название Игры" />
 
-        <!-- 3. Описание -->
         <TextView
             android:id="@+id/detail_text_description"
             android:layout_width="0dp"
@@ -48,9 +43,8 @@
             app:layout_constraintTop_toBottomOf="@id/detail_text_title"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            tools:text="Здесь будет очень длинное описание игры, которое рассказывает о ее мире, геймплее и сюжете. Бла-бла-бла..." />
+            tools:text="Здесь будет очень длинное описание игры..." />
 
-        <!-- 4. Платформы и Жанр (в один ряд) -->
         <TextView
             android:id="@+id/detail_text_platform"
             android:layout_width="wrap_content"
@@ -73,18 +67,16 @@
             app:layout_constraintStart_toEndOf="@id/detail_text_platform"
             tools:text="Жанр: RPG" />
 
-        <!-- 5. Блок "Избранное" (Отзыв и Оценка) -->
         <TextView
             android:id="@+id/label_favorite"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:text="Добавить в избранное"
+            android:text="Ваш отзыв"
             android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
             app:layout_constraintTop_toBottomOf="@id/detail_text_platform"
             app:layout_constraintStart_toStartOf="parent" />
 
-        <!-- Поле для ввода комментария -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/input_layout_comment"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -94,7 +86,7 @@
             app:layout_constraintTop_toBottomOf="@id/label_favorite"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:hint="Ваш комментарий (отзыв)">
+            android:hint="Ваш комментарий">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/edit_text_comment"
@@ -104,7 +96,6 @@
                 android:gravity="top"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Рейтинг (звездочки) -->
         <RatingBar
             android:id="@+id/rating_bar_user"
             android:layout_width="wrap_content"
@@ -115,16 +106,26 @@
             app:layout_constraintTop_toBottomOf="@id/input_layout_comment"
             app:layout_constraintStart_toStartOf="parent" />
 
-        <!-- Кнопка сохранения -->
+        <!-- Новая кнопка для добавления/удаления из избранного -->
         <Button
-            android:id="@+id/button_save_favorite"
+            android:id="@+id/button_toggle_favorite"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Сохранить"
+            android:layout_marginTop="8dp"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/rating_bar_user"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="8dp" />
+            tools:text="Добавить в избранное" />
 
+        <!-- Старая кнопка, теперь для сохранения отзыва -->
+        <Button
+            android:id="@+id/button_save_review"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="Сохранить отзыв"
+            app:layout_constraintTop_toTopOf="@id/button_toggle_favorite"
+            app:layout_constraintStart_toEndOf="@id/button_toggle_favorite"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

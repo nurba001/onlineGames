@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
         setupSearchView();
         setupSpinners();
 
-        binding.buttonShowFavorites.setOnClickListener(v -> {
+        binding.buttonShowFavoritesIcon.setOnClickListener(v -> {
              Intent intent = new Intent(MainActivity.this, FavoriteActivity.class);
              startActivity(intent);
         });

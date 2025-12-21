@@ -13,15 +13,15 @@ public class GameEntity {
     private String imageUrl;
     private String platform;
     private String genre;
-    private String year; // Storing as String is safer and simpler
+    private String year;
     private String description;
 
-    // User-specific fields with default values
+
     private boolean isFavorite = false;
     private float userRating = 0.0f;
     private String comment = "";
 
-    // A single, clear constructor for Room and the GameConverter to use
+
     public GameEntity(int id, String name, String imageUrl, String platform, String genre, String year, String description) {
         this.id = id;
         this.name = name;
@@ -32,7 +32,7 @@ public class GameEntity {
         this.description = description;
     }
 
-    // --- GETTERS & SETTERS (Required for Room) ---
+    // --- GETTERS & SETTERS
 
     public int getId() {
         return id;

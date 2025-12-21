@@ -17,9 +17,8 @@ public class DetailActivity extends AppCompatActivity {
 
     private ActivityDetailBinding binding;
     private DetailViewModel detailViewModel;
-    private GameEntity currentGame; // Здесь мы храним текущую загруженную игру
+    private GameEntity currentGame;
     private int gameId;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,7 +26,6 @@ public class DetailActivity extends AppCompatActivity {
         binding = ActivityDetailBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        // 1. Получаем ID игры из Intent
         gameId = getIntent().getIntExtra("GAME_ID", -1);
         if (gameId == -1) {
             Toast.makeText(this, "Ошибка: Игра не найдена", Toast.LENGTH_SHORT).show();
@@ -35,69 +33,81 @@ public class DetailActivity extends AppCompatActivity {
             return;
         }
 
-        // 2. Инициализируем ViewModel
         detailViewModel = new ViewModelProvider(this).get(DetailViewModel.class);
 
-        // 3. Подписываемся на данные игры
-        detailViewModel.getGameById(gameId).observe(this, new Observer<GameEntity>() {
-            @Override
-            public void onChanged(GameEntity gameEntity) {
-                if (gameEntity != null) {
-                    currentGame = gameEntity; // Запоминаем игру
-                    updateUI(gameEntity);     // Обновляем экран
-                }
+        detailViewModel.getGameById(gameId).observe(this, gameEntity -> {
+            if (gameEntity != null) {
+                currentGame = gameEntity;
+                updateUI(gameEntity);
             }
         });
 
-        // 4. Настройка кнопки "Сохранить в избранное"
-        binding.buttonSaveFavorite.setOnClickListener(v -> {
-            saveFavoriteData();
+        // --- НОВАЯ ЛОГИКА ДЛЯ КНОПОК ---
+
+        // Кнопка для добавления/удаления из избранного
+        binding.buttonToggleFavorite.setOnClickListener(v -> {
+            toggleFavoriteStatus();
+        });
+
+        // Кнопка для сохранения отзыва
+        binding.buttonSaveReview.setOnClickListener(v -> {
+            saveReviewData();
         });
     }
 
     private void updateUI(GameEntity game) {
-        // Картинка
         Glide.with(this)
                 .load(game.getImageUrl())
                 .placeholder(R.drawable.ic_launcher_background)
-                .into(binding.detailImageCover); // Убедись, что ID в XML такой же (detailImageCover или detailCover)
+                .into(binding.detailImageCover);
 
-        // Тексты
         binding.detailTextTitle.setText(game.getName());
         binding.detailTextDescription.setText(game.getDescription());
         binding.detailTextPlatform.setText("Платформы: " + game.getPlatform());
         binding.detailTextGenre.setText("Жанр: " + game.getGenre());
 
-        // Если мы уже сохраняли отзыв раньше, показываем его
         binding.editTextComment.setText(game.getComment());
         binding.ratingBarUser.setRating(game.getUserRating());
 
-        // Меняем текст кнопки, если игра уже в избранном
+        // Обновляем текст кнопки избранного
         if (game.isFavorite()) {
-            binding.buttonSaveFavorite.setText("Обновить отзыв");
+            binding.buttonToggleFavorite.setText("Удалить из избранного");
         } else {
-            binding.buttonSaveFavorite.setText("Сохранить в избранное");
+            binding.buttonToggleFavorite.setText("Добавить в избранное");
         }
     }
 
-    private void saveFavoriteData() {
+    // --- НОВЫЕ МЕТОДЫ ДЛЯ ОБРАБОТКИ КНОПОК ---
+
+    private void toggleFavoriteStatus() {
         if (currentGame == null) return;
 
-        // 1. Берем данные из полей ввода
+        // Инвертируем статус (true -> false, false -> true)
+        boolean newFavoriteStatus = !currentGame.isFavorite();
+        currentGame.setFavorite(newFavoriteStatus);
+
+        detailViewModel.updateGame(currentGame);
+
+        if (newFavoriteStatus) {
+            Toast.makeText(this, "Добавлено в избранное!", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "Удалено из избранного", Toast.LENGTH_SHORT).show();
+        }
+        // UI обновится автоматически благодаря LiveData
+    }
+
+    private void saveReviewData() {
+        if (currentGame == null) return;
+
         String comment = binding.editTextComment.getText().toString();
         float rating = binding.ratingBarUser.getRating();
 
-        // 2. Обновляем объект игры
+        // Обновляем только поля отзыва
         currentGame.setComment(comment);
         currentGame.setUserRating(rating);
-        currentGame.setFavorite(true); // Теперь это ИЗБРАННАЯ игра!
 
-        // 3. Сохраняем в базу данных через ViewModel
         detailViewModel.updateGame(currentGame);
 
-        Toast.makeText(this, "Добавлено в избранное!", Toast.LENGTH_SHORT).show();
-
-        // Можно закрыть экран после сохранения, или остаться
-        finish();
+        Toast.makeText(this, "Отзыв сохранен!", Toast.LENGTH_SHORT).show();
     }
 }
